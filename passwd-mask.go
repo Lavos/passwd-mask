@@ -1,16 +1,16 @@
 package main
 
 import (
-	"os"
-	"flag"
-	"math/rand"
 	"bytes"
-	"time"
+	"flag"
 	"fmt"
+	"math/rand"
+	"os"
+	"time"
 )
 
 var (
-	mask = flag.String("m", "hhhhhhhhhhhh", "Password generation mask.")
+	mask           = flag.String("m", "hhhhhhhhhhhh", "Password generation mask.")
 	special_string = flag.String("s", "!@#$%^&*_-.", "User specified special characters.")
 
 	r = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -20,8 +20,8 @@ func randomByteFrom(b []byte) byte {
 	return b[r.Intn(len(b))]
 }
 
-func main () {
-	flag.Usage = func () {
+func main() {
+	flag.Usage = func() {
 		fmt.Println("A password generator that uses masks.")
 		flag.PrintDefaults()
 		fmt.Println("The mask flag can consist of the following letters:")
@@ -55,7 +55,7 @@ func main () {
 
 	alpha_numeric_lower := append(alpha_lower, numbers...)
 	alpha_numeric_upper := append(alpha_upper, numbers...)
-	alpha_numeric_mixed := append(alpha_lower,  alpha_upper...)
+	alpha_numeric_mixed := append(alpha_lower, alpha_upper...)
 	alpha_numeric_mixed = append(alpha_numeric_mixed, numbers...)
 
 	code := map[rune][]byte{
