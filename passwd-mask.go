@@ -6,17 +6,17 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"time"
-	"strconv"
 	"regexp"
+	"strconv"
+	"time"
 )
 
 var (
-	mask           = flag.String("m", "h{16}", "Password generation mask. A string containing a variety of placeholders.")
-	special_string = flag.String("s", "!@#$%^&*_-.", "Special characters to use for 's' placeholder.")
+	mask             = flag.String("m", "h{16}", "Password generation mask. A string containing a variety of placeholders.")
+	special_string   = flag.String("s", "!@#$%^&*_-.", "Special characters to use for 's' placeholder.")
 	suppress_newline = flag.Bool("n", false, "If passed, suppress newline after outputting generated password.")
 
-	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	r  = rand.New(rand.NewSource(time.Now().UnixNano()))
 	re = regexp.MustCompile(`([aA#nNmhHbs]{1}){(\d+)}`)
 )
 
@@ -24,7 +24,7 @@ func randomByteFrom(b []byte) byte {
 	return b[r.Intn(len(b))]
 }
 
-func replaceGroup (b []byte) []byte {
+func replaceGroup(b []byte) []byte {
 	matches := re.FindSubmatch(b)
 
 	if matches == nil {
