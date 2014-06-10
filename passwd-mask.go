@@ -7,17 +7,49 @@ import (
 	"math/rand"
 	"os"
 	"time"
+	"strconv"
+	"regexp"
 )
 
 var (
-	mask           = flag.String("m", "hhhhhhhhhhhh", "Password generation mask.")
-	special_string = flag.String("s", "!@#$%^&*_-.", "User specified special characters.")
+	mask           = flag.String("m", "h{16}", "Password generation mask. A string containing a variety of placeholders.")
+	special_string = flag.String("s", "!@#$%^&*_-.", "Special characters to use for 's' placeholder.")
+	suppress_newline = flag.Bool("n", false, "If passed, suppress newline after outputting generated password.")
 
 	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	re = regexp.MustCompile(`([aA#nNmhHbs]{1}){(\d+)}`)
 )
 
 func randomByteFrom(b []byte) byte {
 	return b[r.Intn(len(b))]
+}
+
+func replaceGroup (b []byte) []byte {
+	matches := re.FindSubmatch(b)
+
+	if matches == nil {
+		// no matches found shouldn't happen because it wouldn't get
+		// through the regexp
+		return b
+	}
+
+	char := matches[1]
+	count, err := strconv.ParseInt(string(matches[2]), 10, 64)
+
+	if err != nil {
+		// could not parse int, but it shouldn't happen because
+		// then it wouldn't get through the regexp
+		return b
+	}
+
+	var buf bytes.Buffer
+	var x int64
+
+	for ; x < count; x++ {
+		buf.Write(char)
+	}
+
+	return buf.Bytes()
 }
 
 func main() {
@@ -36,6 +68,7 @@ func main() {
 		fmt.Println("  b: base64")
 		fmt.Println("  s: specials")
 		fmt.Println("All other characters will be untouched.")
+		fmt.Println("{integer} repeats the previous character of the above list that many times, i.e. a{5} becomes aaaaa")
 	}
 
 	flag.Parse()
@@ -76,11 +109,13 @@ func main() {
 	var slice []byte
 	var ok bool
 
-	for _, char := range *mask {
-		slice, ok = code[char]
+	expanded_mask := re.ReplaceAllFunc([]byte(*mask), replaceGroup)
+
+	for _, char := range expanded_mask {
+		slice, ok = code[rune(char)]
 
 		if !ok {
-			insert_char = byte(char)
+			insert_char = char
 		} else {
 			insert_char = randomByteFrom(slice)
 		}
@@ -89,4 +124,8 @@ func main() {
 	}
 
 	password.WriteTo(os.Stdout)
+
+	if !*suppress_newline {
+		fmt.Println()
+	}
 }
