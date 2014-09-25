@@ -76,19 +76,30 @@ func main() {
 	alpha_lower := []byte("abcdefghijklmnopqrstuvwxyz")
 	alpha_upper := []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	numbers := []byte("0123456789")
-	base64_extras := []byte("+/")
 	specials := []byte(*special_string)
 
-	base64 := append(alpha_lower, alpha_upper...)
+	base64 := []byte("+/")
+	base64 = append(base64, alpha_lower...)
+	base64 = append(base64, alpha_upper...)
 	base64 = append(base64, numbers...)
-	base64 = append(base64, base64_extras...)
 
-	hex_lower := append(numbers, []byte("abcef")...)
-	hex_upper := append(numbers, []byte("ABCDEF")...)
+	hex_lower := []byte("abcdef")
+	hex_lower = append(hex_lower, numbers...)
 
-	alpha_numeric_lower := append(alpha_lower, numbers...)
-	alpha_numeric_upper := append(alpha_upper, numbers...)
-	alpha_numeric_mixed := append(alpha_lower, alpha_upper...)
+	hex_upper := []byte("ABCDEF")
+	hex_upper = append(hex_upper, numbers...)
+
+	alpha_numeric_lower := make([]byte, 36)
+	alpha_numeric_lower = append(alpha_numeric_lower, alpha_lower...)
+	alpha_numeric_lower = append(alpha_numeric_lower, numbers...)
+
+	alpha_numeric_upper := make([]byte, 36)
+	alpha_numeric_upper = append(alpha_numeric_upper, alpha_upper...)
+	alpha_numeric_upper = append(alpha_numeric_upper, numbers...)
+
+	alpha_numeric_mixed := make([]byte, 62)
+	alpha_numeric_mixed = append(alpha_numeric_mixed, alpha_upper...)
+	alpha_numeric_mixed = append(alpha_numeric_mixed, alpha_lower...)
 	alpha_numeric_mixed = append(alpha_numeric_mixed, numbers...)
 
 	code := map[rune][]byte{
