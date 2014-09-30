@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"os"
 	"regexp"
 	"strconv"
-	"time"
 )
 
 var (
@@ -16,12 +16,13 @@ var (
 	special_string   = flag.String("s", "!@#$%^&*_-.", "Special characters to use for 's' placeholder.")
 	suppress_newline = flag.Bool("n", false, "If passed, suppress newline after outputting generated password.")
 
-	r  = rand.New(rand.NewSource(time.Now().UnixNano()))
 	re = regexp.MustCompile(`([aA#nNmhHbs]{1}){(\d+)}`)
 )
 
 func randomByteFrom(b []byte) byte {
-	return b[r.Intn(len(b))]
+	max := big.NewInt(int64(len(b)))
+	index, _ := rand.Int(rand.Reader, max)
+	return b[index.Uint64()]
 }
 
 func replaceGroup(b []byte) []byte {
