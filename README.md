@@ -4,7 +4,7 @@ A small password generator that uses masks. It's just using `crypto/rand` intern
 
 ```bash
 go get github.com/Lavos/passwd-mask
-cd $GOPATH/src/github.com/Lavos/passwd-mask
+cd $GOPATH/src/github.com/Lavos/passwd-mask/commands
 go build .
 ```
 
@@ -65,3 +65,7 @@ passwd-mask -m "aaaaa-sssss" -s "#$"
 returns: spgcr-$##$#
 ```
 5x lowercase alpha - 5x of either # or $
+
+### -n
+
+If you using this command for scripting, you can suppress printing the newline at the end of the output by passing the `-n` flag.
