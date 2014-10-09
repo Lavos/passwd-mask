@@ -52,7 +52,7 @@ returns: +KKRK-67255
 passwd-mask -m "b{20}"
 returns: We//QplIEu50bsilLkLR9whwy
 ```
-25 characters of base64.
+20 characters of base64.
 
 ### -s specials
 
