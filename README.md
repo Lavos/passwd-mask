@@ -10,12 +10,10 @@ go build .
 
 ## Usage
 ```bash
-passwd-mask [-m mask] [-s specials] [-n]
+passwd-mask mask [-n]
 ```
 
-### -m mask
-In most usage cases, you will want to pass your specific mask. Otherwise, `passwd-mask` defaults to "h{16}".
-
+### mask
 The mask value is a string with placeholder characters that represent a larger set of characters. Each instance is replaced with a random character from the chosen set.
 
 The characters for each set are:
@@ -29,43 +27,38 @@ The characters for each set are:
 * `h`: hex, lowercase
 * `H`: hex, uppercase
 * `b`: base64
-* `s`: specials
 
 Characters not in this set are copied to the generated password untouched.
 
 {integer} can be used to repeat previous character `integer` times. For example, "h{5}" expands to "hhhhh".
+[characters]{integer} defines a custom set of characters to be used integer times, i.e. [abc]{5} becomes cbaba"
+
+Passing `-` as the mask value makes the program read from STDIN.
 
 #### Examples
 ```bash
-passwd-mask -m "aaa_AAA_###"
+passwd-mask "aaa_AAA_###"
 returns: ozj_DNQ_646
 ```
 3x lowercase alpha _ 3x uppercase alpha _ 3x numbers
 
 ```bash
-passwd-mask -m "bbbbb-#####"
+passwd-mask "bbbbb-#####"
 returns: +KKRK-67255
 ```
 5x base64 - 5x numbers
 
 ```bash
-passwd-mask -m "b{20}"
+passwd-mask "b{20}"
 returns: We//QplIEu50bsilLkLR9whwy
 ```
 20 characters of base64.
 
-### -s specials
-
-You can specify your own special characters for the case that your provider only accepts specific characters.
-
-#### Examples
-
 ```bash
-passwd-mask -m "aaaaa-sssss" -s "#$"
-returns: spgcr-$##$#
+passwd-mask "[.-]{5}"
+returns: .--.-
 ```
-5x lowercase alpha - 5x of either # or $
+5 characters from custom set of .-
 
 ### -n
-
-If you using this command for scripting, you can suppress printing the newline at the end of the output by passing the `-n` flag.
+if you using this command for scripting, you can suppress printing the newline at the end of the output by passing the `-n` flag.

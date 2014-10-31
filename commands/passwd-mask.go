@@ -4,19 +4,22 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Lavos/passwd-mask"
+	"os"
+	"log"
+	"bufio"
 )
 
 var (
-	mask             = flag.String("m", "h{16}", "Password generation mask. A string containing a variety of placeholders.")
-	special_string   = flag.String("s", "!@#$%^&*_-.", "Special characters to use for 's' placeholder.")
 	suppress_newline = flag.Bool("n", false, "If passed, suppress newline after outputting generated password.")
 )
 
 func main() {
 	flag.Usage = func() {
-		fmt.Println("A password generator that uses masks.")
+		fmt.Println("A password generator that uses masks to meet specific requirements.")
+		fmt.Println("Usage: passwd-mask mask")
+		fmt.Println("If you want to read from STDIN, pass '-' as the mask value.")
 		flag.PrintDefaults()
-		fmt.Println("The mask flag can consist of the following letters:")
+		fmt.Println("The mask can consist of the following letters:")
 		fmt.Println("  a: alpha, lowercase")
 		fmt.Println("  A: alpha, uppercase")
 		fmt.Println("  #: numbers")
@@ -26,14 +29,38 @@ func main() {
 		fmt.Println("  h: hex, lowercase")
 		fmt.Println("  H: hex, uppercase")
 		fmt.Println("  b: base64")
-		fmt.Println("  s: specials")
-		fmt.Println("All other characters will be untouched.")
 		fmt.Println("{integer} repeats the previous character of the above list that many times, i.e. a{5} becomes aaaaa")
+		fmt.Println("[characters]{integer} defines a custom set of characters to be used integer times, i.e. [abc]{5} becomes cbaba")
+		fmt.Println("All other characters will be untouched.")
 	}
 
 	flag.Parse()
 
-	password := passwdmask.Generate([]byte(*mask), []byte(*special_string))
+	mask := flag.Arg(0)
+	var password []byte
+	var perr error
+
+	if mask == "" {
+		log.Fatal("No message supplied.")
+	}
+
+	if mask == "-" { // read from STDIN
+		scanner := bufio.NewScanner(os.Stdin)
+
+		for scanner.Scan() {
+			password, perr = passwdmask.Generate(scanner.Bytes())
+		}
+
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		password, perr = passwdmask.Generate([]byte(mask))
+	}
+
+	if perr != nil {
+		log.Fatal(perr)
+	}
 
 	if *suppress_newline {
 		fmt.Printf("%s", password)

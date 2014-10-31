@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"crypto/rand"
 	"math/big"
-	"regexp"
 	"strconv"
+	"fmt"
 )
 
 var (
-	re = regexp.MustCompile(`([aA#nNmhHbs]{1}){(\d+)}`)
 	alpha_lower = []byte("abcdefghijklmnopqrstuvwxyz")
 	alpha_upper = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	numbers = []byte("0123456789")
@@ -39,57 +38,83 @@ func randomByteFrom(b []byte) byte {
 	return b[index.Uint64()]
 }
 
-func replaceGroup(b []byte) []byte {
-	matches := re.FindSubmatch(b)
-
-	if matches == nil {
-		// no matches found shouldn't happen because it wouldn't get
-		// through the regexp
-		return b
-	}
-
-	char := matches[1]
-	count, err := strconv.ParseInt(string(matches[2]), 10, 64)
-
-	if err != nil {
-		// could not parse int, but it shouldn't happen because
-		// then it wouldn't get through the regexp
-		return b
-	}
-
-	var buf bytes.Buffer
-	var x int64
-
-	for ; x < count; x++ {
-		buf.Write(char)
-	}
-
-	return buf.Bytes()
-}
-
-func Generate (mask, specials []byte) []byte {
+func Generate (mask []byte) ([]byte, error) {
 	var password bytes.Buffer
 	var insert_char byte
-	var slice []byte
-	var ok bool
+	var slice, previous_set, custom_set, numbers []byte
+	var x, count uint64
+	var ok, inside_set_definition, inside_count_definition, previous_is_custom bool
+	var parse_err error
 
-	expanded_mask := re.ReplaceAllFunc(mask, replaceGroup)
+	for i, char := range mask {
+		switch char {
 
-	for _, char := range expanded_mask {
-		if char == 's' {
-			insert_char = randomByteFrom(specials)
-		} else {
-			slice, ok = code[rune(char)]
+		case '[': // define set
+			if inside_set_definition || inside_count_definition {
+				return nil, fmt.Errorf("Set: Nested delimiter detected at character index %d.", i);
+			}
 
-			if !ok {
-				insert_char = char
+			inside_set_definition = true
+			custom_set = make([]byte, 0)
+
+		case ']': // close set
+			if !inside_set_definition || inside_count_definition {
+				return nil, fmt.Errorf("Nested closing delimiter detected at character index %d.", i);
+			}
+
+			inside_set_definition = false
+			previous_set = custom_set
+			previous_is_custom = true
+
+		case '{': // define expansion
+			if inside_count_definition || inside_set_definition {
+				return nil, fmt.Errorf("Count: Nested delimiter detected at character index %d.", i);
+			}
+
+			inside_count_definition = true
+			numbers = make([]byte, 0)
+
+		case '}': // close expansion
+			if !inside_count_definition || inside_set_definition {
+				return nil, fmt.Errorf("Nested closing delimiter detected at character index %d.", i);
+			}
+
+			inside_count_definition = false
+			count, parse_err = strconv.ParseUint(string(numbers), 10, 64)
+
+			if parse_err != nil {
+				return nil, fmt.Errorf("'%s' could not be parsed as an integer.", numbers)
+			}
+
+			if !previous_is_custom {
+				count = count - 1
+			}
+
+			for x = 0; x < count; x++ {
+				password.WriteByte(randomByteFrom(previous_set))
+			}
+
+		default:
+			if inside_set_definition {
+				custom_set = append(custom_set, char)
+			} else if inside_count_definition {
+				numbers = append(numbers, char)
 			} else {
-				insert_char = randomByteFrom(slice)
+				slice, ok = code[rune(char)]
+
+				if !ok {
+					insert_char = char
+					previous_set = []byte{insert_char}
+					previous_is_custom = false
+					password.WriteByte(insert_char)
+				} else {
+					previous_set = slice
+					previous_is_custom = false
+					password.WriteByte(randomByteFrom(slice))
+				}
 			}
 		}
-
-		password.WriteByte(insert_char)
 	}
 
-	return password.Bytes()
+	return password.Bytes(), nil
 }
