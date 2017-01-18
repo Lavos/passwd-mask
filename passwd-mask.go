@@ -11,17 +11,39 @@ import (
 var (
 	alpha_lower = []byte("abcdefghijklmnopqrstuvwxyz")
 	alpha_upper = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	alpha_mixed = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+	vowels_lower = []byte("aeiouy")
+	vowels_upper = []byte("AEIOUY")
+	vowels_mixed = []byte("aeiouyAEIOUY")
+	consonants_lower = []byte("abcdfghjklmnpqrstvwxz")
+	consonants_upper = []byte("ABCDFGHJKLMNPQRSTVWXZ")
+	consonants_mixed = []byte("abcdfghjklmnpqrstvwxzABCDFGHJKLMNPQRSTVWXZ")
+
 	numbers = []byte("0123456789")
+
 	base64 = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/")
+
 	hex_lower = []byte("abcdef0123456789")
 	hex_upper = []byte("ABCDEF0123456789")
+
 	alpha_numeric_lower = []byte("abcdefghijklmnopqrstuvwxyz0123456789")
 	alpha_numeric_upper = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 	alpha_numeric_mixed = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
+	number_symbols = []byte("!@#$%^&*()")
+	dna = []byte("UCAG")
+
 	code = map[rune][]byte{
 		'a': alpha_lower,
 		'A': alpha_upper,
+		'B': alpha_mixed,
+		'v': vowels_lower,
+		'V': vowels_upper,
+		'U': vowels_mixed,
+		'c': consonants_lower,
+		'C': consonants_upper,
+		'D': consonants_mixed,
 		'#': numbers,
 		'n': alpha_numeric_lower,
 		'N': alpha_numeric_upper,
@@ -29,6 +51,8 @@ var (
 		'h': hex_lower,
 		'H': hex_upper,
 		'b': base64,
+		's': number_symbols,
+		'd': dna,
 	}
 )
 
