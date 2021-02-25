@@ -21,7 +21,7 @@ The characters for each set are:
 * `a`: alpha, lowercase
 * `A`: alpha, uppercase
 * `#`: numbers
-* `n`: alpha-numeric, lowercase 
+* `n`: alpha-numeric, lowercase
 * `N`: alpha-numeric, uppercase
 * `M`: alpha-numeric, mixed-case
 * `h`: hex, lowercase
